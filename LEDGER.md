@@ -9,6 +9,14 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 ## IN PROGRESS
 - (nothing right now)
 
+## TODO (Vercel deployment track)
+- [ ] refactor(db): abstract database layer for dual drivers
+- [ ] feat(db): add Turso (libsql) driver selected by env
+- [ ] feat(deploy): add Vercel serverless entry and config
+- [ ] docs(ledger): mark Vercel readiness complete
+- [ ] deploy to Vercel (manual — needs Rishit's Vercel account)
+- [ ] verify production (manual — needs TURSO_DATABASE_URL / TURSO_AUTH_TOKEN set in Vercel)
+
 ## TODO
 - [x] 2026-10-07 — chore(app): scaffold Node.js + Express + SQLite project skeleton
 - [x] 2026-10-07 — feat(db): add SQLite schema and seed script with the 16 recipes
