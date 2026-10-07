@@ -43,7 +43,7 @@ everything else is served statically from `public/`.
 
 ## Project layout
 ```
-server.js          Express app + API routes
+local-server.js    Express app + API routes (local dev; Vercel uses api/index.js)
 db/                schema.sql, seed.js
 data/recipes.json  the 16 seed recipes
 public/            frontend (HTML/CSS/JS, no build step)

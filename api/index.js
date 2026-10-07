@@ -5,6 +5,6 @@
 // here is safe: Vercel invokes it per request as a serverless function.
 // vercel.json rewrites /api/* to this function; static files in public/
 // are served by Vercel directly.
-const { app } = require('../server');
+const { app } = require('../local-server');
 
 module.exports = app;

@@ -9,11 +9,11 @@
     "node": ">=18"
   },
   "license": "UNLICENSED",
-  "main": "server.js",
+  "main": "local-server.js",
   "name": "recipe-book-app",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node local-server.js"
   },
   "version": "1.0.0"
 }
