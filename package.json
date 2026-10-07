@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "better-sqlite3": "^13.0.0",
+    "better-sqlite3": "12.4.1",
     "express": "^4.21.2"
   },
   "description": "Personal recipe collection web app \u2014 recipes, cooking mode, grocery list",
