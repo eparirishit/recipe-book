@@ -42,7 +42,8 @@ function seed(db) {
 }
 
 if (require.main === module) {
-  const { db } = require('./database');
+  const { openDb } = require('./database');
+  const { db } = openDb();
   const result = seed(db);
   console.log(result.seeded ? `Seeded ${result.count} recipes.` : `Already seeded (${result.count} recipes).`);
 }

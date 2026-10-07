@@ -12,7 +12,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 ## TODO
 - [x] 2026-10-07 — chore(app): scaffold Node.js + Express + SQLite project skeleton
 - [x] 2026-10-07 — feat(db): add SQLite schema and seed script with the 16 recipes
-- [ ] feat(api): recipes endpoints — list/search/filter, detail, create
+- [x] 2026-10-07 — feat(api): recipes endpoints — list/search/filter, detail, create
 - [ ] feat(api): favorites, per-recipe notes, grocery-list endpoints
 - [ ] feat(web): home feed with search, category chips, filters
 - [ ] feat(web): recipe detail page with ingredient checklist

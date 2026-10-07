@@ -1,7 +1,6 @@
 [
  {
   "number": "01",
-  "category": "SOUPS",
   "ingredients": [
    "6 chicken drumsticks with bone (450–500 g total; about 350 g meat once shredded)",
    "1 litre water",
@@ -20,11 +19,14 @@
    "Place the shredded chicken in the bottom of each bowl, then pour the hot soup over it. Serve immediately."
   ],
   "title": "Pepper Chicken Soup",
-  "description": "A high-protein, comforting chicken soup with a peppery broth and buttery, kasuri methi-coated chicken."
+  "description": "A high-protein, comforting chicken soup with a peppery broth and buttery, kasuri methi-coated chicken.",
+  "serves": "2–3",
+  "time": "30 min (est.)",
+  "category": "Soups",
+  "source": "Source: Instagram reel by @dillifoodies.grills"
  },
  {
   "number": "02",
-  "category": "SOUPS",
   "ingredients": [
    "2 medium tomatoes, chopped",
    "2 medium carrots, chopped",
@@ -51,11 +53,14 @@
    "Ladle into bowls while hot and finish with chopped parsley."
   ],
   "title": "Creamy Chicken Soup (No Cream, No Oil)",
-  "description": "A smooth, creamy-textured chicken soup with no cream or oil — the pressure-cooked vegetables are blended to give the broth its body."
+  "description": "A smooth, creamy-textured chicken soup with no cream or oil — the pressure-cooked vegetables are blended to give the broth its body.",
+  "serves": "2–3 (est.)",
+  "time": "35 min (est.)",
+  "category": "Soups",
+  "source": "Source: Instagram reel by @dillifoodies.grills"
  },
  {
   "number": "09",
-  "category": "SOUPS",
   "ingredients": [
    "Chicken with bone, 250 g",
    "Ginger, 1 inch",
@@ -80,11 +85,13 @@
   ],
   "title": "Chicken Rasam Rice",
   "description": "Comfort in a bowl — bone-in chicken pressure-cooked in a tangy, spicy rasam broth with crushed pepper, garlic, shallots, and tomato, served over steamed rice.",
+  "serves": "2–3",
+  "time": "40 min (est.)",
+  "category": "Soups",
   "source": "Source: Instagram reel by @auraartofhealthyliving (Adhya Subramanian)"
  },
  {
   "number": "03",
-  "category": "RICE & GRAINS",
   "ingredients": [
    "8 oz salmon fillet",
    "¼ tsp salt",
@@ -106,11 +113,14 @@
    "Add the rice, soy sauce, oyster sauce, and sugar. Cook over high heat for 1–2 minutes, tossing everything together. Serve hot."
   ],
   "title": "Salmon Fried Rice",
-  "description": "A full-flavored salmon fried rice with crisp-seared fish, aromatics, eggs, and a savory soy-oyster sauce."
+  "description": "A full-flavored salmon fried rice with crisp-seared fish, aromatics, eggs, and a savory soy-oyster sauce.",
+  "serves": "2 (est.)",
+  "time": "15 min (est.)",
+  "category": "Rice & Grains",
+  "source": "Source: Instagram reel by @myhealthydish (My Nguyen)"
  },
  {
   "number": "07",
-  "category": "RICE & GRAINS",
   "ingredients": [
    "Ghee, 1 tbsp",
    "Cumin seeds, ½ tsp",
@@ -140,11 +150,13 @@
   ],
   "title": "Punjabi Pepper Chicken Pulao",
   "description": "A one-pot Punjabi-style pepper chicken pulao — whole spices bloomed in ghee, golden-brown onions, and bone-in chicken thighs layered with basmati rice and finished with fresh coriander.",
+  "serves": "4",
+  "time": "40 min (est.)",
+  "category": "Rice & Grains",
   "source": "Source: Instagram reel by @ral.livezy (Ralston D'Souza); recipe by @sunnybynite91"
  },
  {
   "number": "15",
-  "category": "RICE & GRAINS",
   "ingredients": [
    "Basmati rice, 1½ cups (300 g) (est.)",
    "Boiled eggs, 4–6 (est.)",
@@ -182,11 +194,13 @@
   ],
   "title": "Egg Pulao",
   "description": "A one-pot, minimum-effort egg pulao — khille khille rice layered with perfectly spiced masala-coated eggs, finished with a 10-minute dum.",
+  "serves": "3–4 (est.)",
+  "time": "40 min (est.)",
+  "category": "Rice & Grains",
   "source": "Source: Instagram reel by @yourfoodlab (Chef Sanjyot Keer)"
  },
  {
   "number": "04",
-  "category": "CHICKEN & POULTRY",
   "ingredients": [
    "400 g chicken breast pieces",
    "1½ tsp salt",
@@ -211,11 +225,14 @@
    "Serve the pan-fried chicken with the garlic yogurt dip."
   ],
   "title": "Lemon Pepper Chicken with Garlic Yogurt Dip",
-  "description": "Crispy-on-the-outside, juicy-on-the-inside chicken breast pieces marinated in lemon and pepper, served with a creamy garlic yogurt dip."
+  "description": "Crispy-on-the-outside, juicy-on-the-inside chicken breast pieces marinated in lemon and pepper, served with a creamy garlic yogurt dip.",
+  "serves": "2–3 (est.)",
+  "time": "6+ hrs (incl. 5–6 hr marinate; ~30 min active) (est.)",
+  "category": "Chicken & Poultry",
+  "source": "Source: Instagram reel by @salonikukreja (Saloni Kukreja)"
  },
  {
   "number": "06",
-  "category": "CHICKEN & POULTRY",
   "ingredients": [
    "150 g chicken breast",
    "1 tbsp ginger-garlic paste",
@@ -245,11 +262,14 @@
    "Arrange the lettuce, cucumber, onion, and cherry tomatoes in a bowl. Top with the sliced chicken, drizzle with the garlic sauce, and serve."
   ],
   "title": "High-Protein Chicken Shawarma Salad",
-  "description": "A 53g-protein, 360-calorie shawarma-style chicken salad — charred spice-marinated chicken over crisp vegetables with a creamy garlic-yogurt shawarma sauce."
+  "description": "A 53g-protein, 360-calorie shawarma-style chicken salad — charred spice-marinated chicken over crisp vegetables with a creamy garlic-yogurt shawarma sauce.",
+  "serves": "1–2 (est.)",
+  "time": "25 min (est.) + optional marinating",
+  "category": "Chicken & Poultry",
+  "source": "Source: Instagram reel by @foodwatii (Shreya)"
  },
  {
   "number": "10",
-  "category": "CHICKEN & POULTRY",
   "ingredients": [
    "Oil, 1 tbsp",
    "Onion, ½ (about 50 g)",
@@ -284,11 +304,13 @@
   ],
   "title": "Sukha Chicken Roast",
   "description": "A dry-roasted chicken tossed in a freshly ground onion-tomato-spice paste with coriander and mint, finished with shredded coconut and roasted until dry.",
+  "serves": "3",
+  "time": "35 min (est.)",
+  "category": "Chicken & Poultry",
   "source": "Source: Instagram reel by @ral.livezy (Ralston D'Souza); recipe by @terrace_village_kitchen"
  },
  {
   "number": "13",
-  "category": "CHICKEN & POULTRY",
   "ingredients": [
    "Oil, 2 tbsp (est.)",
    "Onion, finely chopped, 1 large (est.)",
@@ -313,11 +335,13 @@
   ],
   "title": "Green Chicken Chilli",
   "description": "A one-pan, beginner-friendly desi-style chicken chilli — boneless chicken sautéed with onion, lots of garlic and ginger, and slit green chillies, finished with a generous pour of green chilli sauce.",
+  "serves": "3–4 (est.)",
+  "time": "25 min (est.)",
+  "category": "Chicken & Poultry",
   "source": "Source: Instagram reel by @lets_eat_with_prachi (Prachi Agarkar)"
  },
  {
   "number": "14",
-  "category": "CHICKEN & POULTRY",
   "ingredients": [
    "Chicken, 250 g",
    "Ghee, 1 tsp",
@@ -336,11 +360,13 @@
   ],
   "title": "Simple Ghee-Garlic Chicken",
   "description": "A classic example of simple ingredients tasting fantastic — chicken cooked in ghee with garlic, green chillies, and crushed pepper until tender.",
+  "serves": "2 (est.)",
+  "time": "20 min (est.)",
+  "category": "Chicken & Poultry",
   "source": "Source: Instagram reel by @imkarthi_89 (Karthikeyan Selvaraj)"
  },
  {
   "number": "05",
-  "category": "CHUTNEYS & CONDIMENTS",
   "ingredients": [
    "Shallots (pearl onions), peeled, about 2 cups (est.)",
    "Garlic cloves, peeled, about 1 cup (est.)",
@@ -361,11 +387,14 @@
    "Mix the hot pachadi into cooked white rice by hand until evenly coated orange-red. Serve and eat hot."
   ],
   "title": "Onion Vellulli Pachadi (Onion-Garlic Chutney with Rice)",
-  "description": "A spicy Telugu-style onion-garlic pachadi — shallots, garlic, red chilli and turmeric blended into a paste, fried in oil with cumin, onion and curry leaves, then mixed by hand with hot white rice. Deep red, oily, and eaten as a full rice meal."
+  "description": "A spicy Telugu-style onion-garlic pachadi — shallots, garlic, red chilli and turmeric blended into a paste, fried in oil with cumin, onion and curry leaves, then mixed by hand with hot white rice. Deep red, oily, and eaten as a full rice meal.",
+  "serves": "2–3 (est.)",
+  "time": "20 min (est.)",
+  "category": "Chutneys & Condiments",
+  "source": "Source: Instagram reel by @recipesbyhemanth (Hemanth, Hyderabad)"
  },
  {
   "number": "08",
-  "category": "CURRIES",
   "ingredients": [
    "Soya chunks, raw, 70 g",
    "Salt, 1 tsp (for boiling) + 1 tsp (for the masala)",
@@ -399,11 +428,13 @@
   ],
   "title": "Restaurant Style Soya Masala",
   "description": "A restaurant-style soya masala — turmeric-boiled soya chunks crisped in butter, folded into a rich onion-tomato-cashew masala and finished with garam masala and kasuri methi.",
+  "serves": "1–2 (est.)",
+  "time": "35 min (est.)",
+  "category": "Curries",
   "source": "Source: Instagram reel by @ral.livezy (Ralston D'Souza); recipe by @sekhiya.kitchen"
  },
  {
   "number": "11",
-  "category": "CURRIES",
   "ingredients": [
    "Oil (est.)",
    "Red chilli powder (est.)",
@@ -431,11 +462,13 @@
   ],
   "title": "Nizami Chicken",
   "description": "A rich, creamy, spicy Nizami-style chicken curry — chicken pieces marinated with fried onion, green chillies, and spices, simmered until thick and finished with ghee.",
+  "serves": "3–4 (est.)",
+  "time": "35 min (est.)",
+  "category": "Curries",
   "source": "Source: Instagram reel by @themadchefindia (Chef Koushik S., The Mad Chef India) — reconstructed from the video's on-screen labels; all quantities estimated"
  },
  {
   "number": "12",
-  "category": "CURRIES",
   "ingredients": [
    "High-protein paneer, cubed, 1 cup (135 g)",
    "Spinach, blanched, 2 packed cups raw (70 g)",
@@ -474,11 +507,13 @@
   ],
   "title": "Afghani Palak Paneer Egg Curry",
   "description": "Imagine crossing lasooni palak paneer with a creamy, zesty Afghani gravy — one pan, creamy, comforting, and way higher in protein.",
+  "serves": "3",
+  "time": "30 min (est.)",
+  "category": "Curries",
   "source": "Source: Instagram reel by @aathirasethumadhavan (Aathira Sethumadhavan)"
  },
  {
   "number": "16",
-  "category": "NOODLES",
   "ingredients": [
    "Maggi noodles, 2 packets (with 2 tastemaker packets)",
    "Oil, 1 tsp (for boiling)",
@@ -506,6 +541,9 @@
   ],
   "title": "Lemon Coriander Maggi",
   "description": "The \"bestestest\" Maggi — butter-sautéed garlic, chilli, and onion tossed with noodles in a soy-maggi masala, finished with fresh lemon juice and coriander.",
+  "serves": "2 (est.)",
+  "time": "15 min (est.)",
+  "category": "Noodles",
   "source": "Source: Instagram reel by @soulfulswaad (Prachi)"
  }
 ]
