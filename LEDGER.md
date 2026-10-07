@@ -14,7 +14,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - [x] 2026-10-07 — feat(db): add SQLite schema and seed script with the 16 recipes
 - [x] 2026-10-07 — feat(api): recipes endpoints — list/search/filter, detail, create
 - [x] 2026-10-07 — feat(api): favorites, per-recipe notes, grocery-list endpoints
-- [ ] feat(web): home feed with search, category chips, filters
+- [x] 2026-10-07 — feat(web): home feed with search, category chips, filters
 - [ ] feat(web): recipe detail page with ingredient checklist
 - [ ] feat(web): cooking mode — step-by-step, timers, wake lock
 - [ ] feat(web): grocery list tab + add-recipe form
