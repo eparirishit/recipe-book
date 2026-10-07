@@ -4,12 +4,11 @@
     "better-sqlite3": "12.4.1",
     "express": "^4.21.2"
   },
-  "description": "Personal recipe collection web app — recipes, cooking mode, grocery list",
+  "description": "Personal recipe collection web app \u2014 recipes, cooking mode, grocery list",
   "engines": {
     "node": ">=18"
   },
   "license": "UNLICENSED",
-  "main": "local-server.js",
   "name": "recipe-book-app",
   "private": true,
   "scripts": {
