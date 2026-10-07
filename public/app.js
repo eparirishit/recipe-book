@@ -408,8 +408,129 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && state.tab === 'cooking') requestWakeLock();
 });
 
+// ---------------- grocery list ----------------
+async function renderGrocery() {
+  const groups = await api('/api/grocery');
+  const total = groups.reduce((n, g) => n + g.items.length, 0);
+  const checkedCount = groups.reduce((n, g) => n + g.items.filter(i => i.checked).length, 0);
+
+  view.innerHTML = `
+    <div class="page-head">
+      <div class="kicker">Shopping</div>
+      <h1>Grocery List</h1>
+      <p class="sub">${total ? `${checkedCount} of ${total} checked` : 'Add ingredients from any recipe.'}</p>
+    </div>
+    ${total ? `<div class="grocery-actions">
+      <button class="btn btn-outline" id="clearChecked" style="flex:1">Clear checked</button>
+    </div>` : ''}
+    ${groups.length ? groups.map(g => `
+      <div class="grocery-group">
+        <h3>${esc(g.recipeTitle)}</h3>
+        <ul>
+          ${g.items.map(it => `
+            <li class="${it.checked ? 'done' : ''}" data-id="${it.id}">
+              <span class="checkbox" data-check style="cursor:pointer"></span>
+              <span class="g-label">${esc(it.label)}</span>
+              <button class="del" data-del aria-label="Remove">×</button>
+            </li>`).join('')}
+        </ul>
+      </div>`).join('')
+      : `<div class="empty"><div class="big">List is empty</div><p>Open a recipe and tap the basket icon to add its ingredients.</p></div>`}`;
+
+  const clearBtn = document.getElementById('clearChecked');
+  if (clearBtn) clearBtn.addEventListener('click', async () => {
+    await api('/api/grocery?checked=1', { method: 'DELETE' });
+    toast('Checked items cleared');
+    renderGrocery();
+  });
+
+  view.querySelectorAll('.grocery-group').forEach(groupEl => {
+    groupEl.addEventListener('click', async e => {
+      const li = e.target.closest('li');
+      if (!li) return;
+      const id = li.dataset.id;
+      if (e.target.closest('[data-del]')) {
+        await api('/api/grocery/' + id, { method: 'DELETE' });
+        li.remove();
+        return;
+      }
+      if (e.target.closest('[data-check]') || e.target.closest('.g-label')) {
+        const nowDone = !li.classList.contains('done');
+        const updated = await api('/api/grocery/' + id, {
+          method: 'PATCH', body: JSON.stringify({ checked: nowDone }),
+        });
+        li.classList.toggle('done', updated.checked);
+      }
+    });
+  });
+}
+
+// ---------------- add recipe ----------------
+const SEED_CATEGORIES = ['Soups', 'Rice & Grains', 'Chicken & Poultry', 'Chutneys & Condiments', 'Curries', 'Noodles'];
+
+function renderAdd() {
+  const cats = [...new Set([...SEED_CATEGORIES, ...state.categories])];
+  view.innerHTML = `
+    <div class="page-head">
+      <div class="kicker">New entry</div>
+      <h1>Add a Recipe</h1>
+      <p class="sub">It gets the next permanent recipe number automatically.</p>
+    </div>
+    <form class="form" id="addForm">
+      <div><label for="fTitle">Title</label><input id="fTitle" required maxlength="120" placeholder="e.g. Tomato Bath"></div>
+      <div><label for="fCat">Category</label>
+        <select id="fCat">${cats.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__new">+ New category…</option></select>
+      </div>
+      <div id="newCatWrap" style="display:none"><label for="fNewCat">New category name</label><input id="fNewCat" maxlength="60"></div>
+      <div class="row2">
+        <div><label for="fServes">Serves</label><input id="fServes" maxlength="30" placeholder="2–3"></div>
+        <div><label for="fTime">Time</label><input id="fTime" maxlength="40" placeholder="30 min"></div>
+      </div>
+      <div><label for="fDesc">Description</label><textarea id="fDesc" style="min-height:70px" maxlength="500" placeholder="One or two lines about the dish"></textarea></div>
+      <div><label for="fIng">Ingredients — one per line</label><textarea id="fIng" required placeholder="Chicken, 500 g&#10;Onion, 2"></textarea></div>
+      <div><label for="fMethod">Method — one step per line</label><textarea id="fMethod" required placeholder="Marinate the chicken…&#10;Heat oil in a pan…"></textarea></div>
+      <div><label for="fSource">Source (optional)</label><input id="fSource" maxlength="200" placeholder="Instagram reel by @…"></div>
+      <button class="btn btn-primary" type="submit">Save recipe</button>
+    </form>
+    <div class="roadmap">
+      <strong>Coming soon:</strong> import straight from an Instagram reel link —
+      paste a link and the recipe fills itself in, just like the chat workflow today.
+    </div>`;
+
+  document.getElementById('fCat').addEventListener('change', e => {
+    document.getElementById('newCatWrap').style.display = e.target.value === '__new' ? '' : 'none';
+  });
+
+  document.getElementById('addForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const catSel = document.getElementById('fCat').value;
+    const category = catSel === '__new'
+      ? document.getElementById('fNewCat').value.trim()
+      : catSel;
+    if (!category) { toast('Pick or name a category'); return; }
+    try {
+      const created = await api('/api/recipes', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: document.getElementById('fTitle').value.trim(),
+          category,
+          serves: document.getElementById('fServes').value.trim(),
+          time: document.getElementById('fTime').value.trim(),
+          description: document.getElementById('fDesc').value.trim(),
+          ingredients: document.getElementById('fIng').value,
+          method: document.getElementById('fMethod').value,
+          source: document.getElementById('fSource').value.trim(),
+        }),
+      });
+      state.categories = await api('/api/categories');
+      toast(`Recipe ${pad2(created.number)} saved`);
+      go('detail', created.id);
+    } catch (err) { toast(err.message); }
+  });
+}
+
 // ---------------- navigation ----------------
-const routes = { home: renderHome, favorites: renderHome, detail: renderDetail, cooking: renderCooking };
+const routes = { home: renderHome, favorites: renderHome, detail: renderDetail, cooking: renderCooking, grocery: renderGrocery, add: renderAdd };
 
 function setActiveTab() {
   document.querySelectorAll('#tabbar .tab').forEach(t => {

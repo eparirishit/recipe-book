@@ -17,7 +17,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - [x] 2026-10-07 — feat(web): home feed with search, category chips, filters
 - [x] 2026-10-07 — feat(web): recipe detail page with ingredient checklist
 - [x] 2026-10-07 — feat(web): cooking mode — step-by-step, timers, wake lock
-- [ ] feat(web): grocery list tab + add-recipe form
+- [x] 2026-10-07 — feat(web): grocery list tab + add-recipe form
 - [ ] docs(ledger): mark backend implementation complete, note hosted app link
 
 ## DONE
