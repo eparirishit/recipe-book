@@ -10,7 +10,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - (nothing right now)
 
 ## TODO (Vercel deployment track)
-- [ ] refactor(db): abstract database layer for dual drivers
+- [x] 2026-10-07 — refactor(db): abstract database layer for dual drivers
 - [ ] feat(db): add Turso (libsql) driver selected by env
 - [ ] feat(deploy): add Vercel serverless entry and config
 - [ ] docs(ledger): mark Vercel readiness complete
