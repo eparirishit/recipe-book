@@ -14,8 +14,8 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - [x] 2026-10-07 — feat(db): add Turso (libsql) driver selected by env
 - [x] 2026-10-07 — feat(deploy): add Vercel serverless entry and config
 - [x] 2026-10-07 — docs(ledger): mark Vercel readiness complete
-- [ ] deploy to Vercel (manual — needs Rishit's Vercel account)
-- [ ] verify production (manual — needs TURSO_DATABASE_URL / TURSO_AUTH_TOKEN set in Vercel)
+- [x] 2026-10-07 — deploy to Vercel (project recipe-book linked to eparirishit/recipe-book, auto-deploys on push to main)
+- [x] 2026-10-07 — verify production (all endpoints + frontend verified live; test data cleaned up)
 
 ## TODO
 - [x] 2026-10-07 — chore(app): scaffold Node.js + Express + SQLite project skeleton
@@ -61,3 +61,20 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - Remaining manual steps (need Rishit's accounts): create Turso DB,
   import repo in Vercel, set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN,
   deploy, verify production.
+
+## Production deployment notes (2026-10-07)
+- Live at https://recipe-book-rishit-eparis-projects.vercel.app (production).
+- Vercel project `recipe-book` linked to this repo; pushes to main auto-deploy.
+- Env vars set in Vercel (production + preview): TURSO_DATABASE_URL,
+  TURSO_AUTH_TOKEN (token value only in Vercel, never in the repo).
+- Deployment protection (Vercel Authentication) disabled so the app opens
+  without a Vercel login.
+- Gotchas fixed during deploy:
+  - Vercel maps package.json `main` to a serverless function at `/`, so the
+    root server entry was renamed to local-server.js and `main` removed;
+    serverless entry remains api/index.js.
+  - vercel.json explicitly rewrites `/` to /index.html.
+  - Project framework preset `express` was removed (it made Vercel demand a
+    server entrypoint); the project now builds as generic Node + static.
+- Production verified: 16 recipes seeded in Turso, search/filter/favorites/
+  notes/grocery CRUD all working, frontend 200.
