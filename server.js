@@ -111,6 +111,86 @@ app.post('/api/recipes', (req, res) => {
   res.status(201).json(rowToRecipe(created));
 });
 
+// Favorite toggle / personal note.
+app.patch('/api/recipes/:id', (req, res) => {
+  const row = db.prepare('SELECT * FROM recipes WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Recipe not found' });
+  const { favorite, note } = req.body || {};
+  const updates = [];
+  const params = [];
+  if (favorite !== undefined) {
+    updates.push('favorite = ?');
+    params.push(favorite ? 1 : 0);
+  }
+  if (note !== undefined) {
+    updates.push('note = ?');
+    params.push(String(note));
+  }
+  if (!updates.length) return res.status(400).json({ error: 'Nothing to update (favorite, note)' });
+  params.push(req.params.id);
+  db.prepare(`UPDATE recipes SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+  res.json(rowToRecipe(db.prepare('SELECT * FROM recipes WHERE id = ?').get(req.params.id)));
+});
+
+// ---------- grocery list ----------
+// Grouped by recipe: [{ recipeId, recipeTitle, items: [{id, label, checked}] }]
+app.get('/api/grocery', (req, res) => {
+  const items = db.prepare('SELECT * FROM grocery_items ORDER BY recipe_title, id').all();
+  const groups = [];
+  const byRecipe = new Map();
+  for (const it of items) {
+    const key = it.recipe_id ?? `other-${it.recipe_title}`;
+    if (!byRecipe.has(key)) {
+      const g = { recipeId: it.recipe_id, recipeTitle: it.recipe_title, items: [] };
+      byRecipe.set(key, g);
+      groups.push(g);
+    }
+    byRecipe.get(key).items.push({ id: it.id, label: it.label, checked: !!it.checked });
+  }
+  res.json(groups);
+});
+
+// Add every ingredient of a recipe to the grocery list.
+app.post('/api/grocery', (req, res) => {
+  const { recipeId } = req.body || {};
+  const recipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(recipeId);
+  if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+  const ingredients = safeParse(recipe.ingredients, []);
+  const insert = db.prepare(
+    'INSERT INTO grocery_items (recipe_id, recipe_title, label, checked) VALUES (?, ?, ?, 0)'
+  );
+  const txn = db.transaction((labels) => {
+    for (const label of labels) insert.run(recipe.id, recipe.title, label);
+  });
+  txn(ingredients);
+  res.status(201).json({ added: ingredients.length, recipeId: recipe.id, recipeTitle: recipe.title });
+});
+
+app.patch('/api/grocery/:itemId', (req, res) => {
+  const item = db.prepare('SELECT * FROM grocery_items WHERE id = ?').get(req.params.itemId);
+  if (!item) return res.status(404).json({ error: 'Grocery item not found' });
+  const { checked } = req.body || {};
+  if (checked === undefined) return res.status(400).json({ error: 'checked is required' });
+  db.prepare('UPDATE grocery_items SET checked = ? WHERE id = ?').run(checked ? 1 : 0, req.params.itemId);
+  const updated = db.prepare('SELECT * FROM grocery_items WHERE id = ?').get(req.params.itemId);
+  res.json({ id: updated.id, label: updated.label, checked: !!updated.checked });
+});
+
+app.delete('/api/grocery/:itemId', (req, res) => {
+  const info = db.prepare('DELETE FROM grocery_items WHERE id = ?').run(req.params.itemId);
+  if (!info.changes) return res.status(404).json({ error: 'Grocery item not found' });
+  res.json({ deleted: req.params.itemId });
+});
+
+// Clear checked items (DELETE /api/grocery?checked=1).
+app.delete('/api/grocery', (req, res) => {
+  if (req.query.checked === '1') {
+    const info = db.prepare('DELETE FROM grocery_items WHERE checked = 1').run();
+    return res.json({ cleared: info.changes });
+  }
+  return res.status(400).json({ error: 'Use ?checked=1 to clear checked items' });
+});
+
 // ---------- frontend fallback ----------
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
