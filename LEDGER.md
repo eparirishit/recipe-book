@@ -13,7 +13,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - [x] 2026-10-07 — refactor(db): abstract database layer for dual drivers
 - [x] 2026-10-07 — feat(db): add Turso (libsql) driver selected by env
 - [x] 2026-10-07 — feat(deploy): add Vercel serverless entry and config
-- [ ] docs(ledger): mark Vercel readiness complete
+- [x] 2026-10-07 — docs(ledger): mark Vercel readiness complete
 - [ ] deploy to Vercel (manual — needs Rishit's Vercel account)
 - [ ] verify production (manual — needs TURSO_DATABASE_URL / TURSO_AUTH_TOKEN set in Vercel)
 
@@ -47,3 +47,17 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
   Node 24 (ABI 137), and node-gyp cannot compile in this sandbox.
 - Live hosted prototype (static, no persistence) remains the Muse
   "recipe-book" web artifact; this repo is the backend source of truth.
+
+## Vercel readiness notes (2026-10-07)
+- Code is Vercel-ready: db/index.js selects the Turso driver when
+  TURSO_DATABASE_URL is set, else the local better-sqlite3 file DB.
+- db/turso.js verified end to end against a local file: URL
+  (@libsql/client 0.18.0): 16 driver checks + server smoke test passed
+  (seed idempotent, search/filter/favorites/notes/grocery CRUD).
+- Gotcha fixed: schema.sql's `--` comments contain a semicolon, so the
+  Turso driver strips line comments before splitting statements.
+- api/index.js exports the Express app without listening (verified it
+  loads and exits cleanly); vercel.json rewrites /api/* to /api.
+- Remaining manual steps (need Rishit's accounts): create Turso DB,
+  import repo in Vercel, set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN,
+  deploy, verify production.
