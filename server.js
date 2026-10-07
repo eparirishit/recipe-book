@@ -2,6 +2,7 @@
 // API routes are added in later commits; this skeleton boots the app.
 const path = require('path');
 const express = require('express');
+const { db } = require('./db/database'); // creates data/recipebook.db + seeds on first run
 
 const app = express();
 const PORT = process.env.PORT || 3000;
