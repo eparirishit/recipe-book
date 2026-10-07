@@ -18,7 +18,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - [x] 2026-10-07 — feat(web): recipe detail page with ingredient checklist
 - [x] 2026-10-07 — feat(web): cooking mode — step-by-step, timers, wake lock
 - [x] 2026-10-07 — feat(web): grocery list tab + add-recipe form
-- [ ] docs(ledger): mark backend implementation complete, note hosted app link
+- [x] 2026-10-07 — docs(ledger): mark backend implementation complete, note hosted app link
 
 ## DONE
 - [x] 2026-10-07 — docs(ledger): created this ledger
@@ -31,3 +31,11 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - Recipe numbers are permanent IDs (01–16); new recipes take the next number.
 - Live hosted prototype: the Muse "recipe-book" web artifact (static, no
   persistence). This repo is the source of truth for the backend version.
+
+## Completion notes (2026-10-07)
+- Backend verified end to end: 20 checks passed (all API endpoints,
+  filters, favorites, notes, grocery CRUD, frontend serving).
+- better-sqlite3 pinned to 12.4.1: v13.0.3 ships no prebuilt binary for
+  Node 24 (ABI 137), and node-gyp cannot compile in this sandbox.
+- Live hosted prototype (static, no persistence) remains the Muse
+  "recipe-book" web artifact; this repo is the backend source of truth.
