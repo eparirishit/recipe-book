@@ -21,6 +21,26 @@ npm start
 Then open http://localhost:3000. The SQLite database is created on first
 run and seeded with the 16 recipes.
 
+## Deploy to Vercel
+
+Vercel's serverless filesystem is ephemeral, so the app uses Turso
+(libsql) for storage in production instead of the local SQLite file.
+The driver is selected automatically: when `TURSO_DATABASE_URL` is set,
+the Turso driver is used; otherwise the local better-sqlite3 file DB.
+
+1. Create a database at [turso.tech](https://turso.tech) and note its URL
+   (`libsql://...`) and auth token.
+2. Import this repo in Vercel (framework preset: Other).
+3. Add environment variables:
+   - `TURSO_DATABASE_URL` — your Turso database URL
+   - `TURSO_AUTH_TOKEN` — your Turso auth token
+4. Deploy. On first request the function applies the schema and seeds
+   the 16 starter recipes (idempotent — a single `COUNT(*)` check per
+   cold start, then skipped on warm invocations).
+
+`vercel.json` rewrites `/api/*` to the serverless function in `api/`;
+everything else is served statically from `public/`.
+
 ## Project layout
 ```
 server.js          Express app + API routes
