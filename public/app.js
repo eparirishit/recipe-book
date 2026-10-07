@@ -160,8 +160,88 @@ async function refreshHome(rerenderShell = true) {
   }
 }
 
+// ---------------- recipe detail ----------------
+let detailRecipe = null;
+const checkedIng = new Set();
+
+async function renderDetail(id) {
+  detailRecipe = await api('/api/recipes/' + id);
+  checkedIng.clear();
+  const r = detailRecipe;
+
+  view.innerHTML = `
+    <button class="back-link" id="backBtn">${ICONS.back}All recipes</button>
+    <div class="detail-hero" style="background:${catGradient(r.category)}">
+      <div class="crumb">Recipe ${pad2(r.number)} · ${esc(r.category)}</div>
+      <h1>${esc(r.title)}</h1>
+      <div class="meta">
+        ${r.time ? `<span>${ICONS.clock}${esc(r.time)}</span>` : ''}
+        ${r.serves ? `<span>${ICONS.serves}Serves ${esc(r.serves)}</span>` : ''}
+      </div>
+    </div>
+    ${r.description ? `<div class="detail-sec"><p class="desc">${esc(r.description)}</p></div>` : ''}
+    <div class="action-bar">
+      <button class="btn btn-primary" id="cookBtn">Start cooking</button>
+      <button class="btn btn-outline ${r.favorite ? 'active' : ''}" id="favBtn" aria-label="Toggle favorite">${ICONS.heart}</button>
+      <button class="btn btn-outline" id="grocBtn" aria-label="Add ingredients to grocery list" title="Add ingredients to grocery list">
+        <svg viewBox="0 0 24 24"><path d="M6 7V6a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v1h3v2h-3v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9H3V7h3zm2 0h8V6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1z"/></svg>
+      </button>
+    </div>
+    <div class="detail-sec">
+      <h3>Ingredients <span class="count">${r.ingredients.length}</span></h3>
+      <ul class="ing-list" id="ingList">
+        ${r.ingredients.map((ing, i) => `<li data-i="${i}"><span class="checkbox"></span><span>${esc(ing)}</span></li>`).join('')}
+      </ul>
+    </div>
+    <div class="detail-sec">
+      <h3>Method <span class="count">${r.method.length} steps</span></h3>
+      <ol class="method-list">
+        ${r.method.map(s => `<li>${esc(s)}</li>`).join('')}
+      </ol>
+    </div>
+    ${r.source ? `<div class="detail-sec"><p class="source-line">${esc(r.source)}</p></div>` : ''}
+    <div class="note-box">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:12px;">My notes</h3>
+      <textarea id="noteText" placeholder="How did it turn out? Tweaks for next time…">${esc(r.note || '')}</textarea>
+      <button class="btn btn-primary" id="noteSave">Save note</button>
+    </div>`;
+
+  document.getElementById('backBtn').addEventListener('click', () => go('home'));
+  document.getElementById('cookBtn').addEventListener('click', () => go('cooking', r.id));
+  document.getElementById('favBtn').addEventListener('click', async (e) => {
+    try {
+      const updated = await api('/api/recipes/' + r.id, {
+        method: 'PATCH', body: JSON.stringify({ favorite: !r.favorite }),
+      });
+      detailRecipe = updated;
+      e.currentTarget.classList.toggle('active', updated.favorite);
+      toast(updated.favorite ? 'Saved to favorites' : 'Removed from favorites');
+    } catch (err) { toast(err.message); }
+  });
+  document.getElementById('grocBtn').addEventListener('click', async () => {
+    try {
+      const res = await api('/api/grocery', { method: 'POST', body: JSON.stringify({ recipeId: r.id }) });
+      toast(`${res.added} ingredients added to grocery list`);
+    } catch (err) { toast(err.message); }
+  });
+  document.getElementById('ingList').addEventListener('click', e => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    li.classList.toggle('done');
+  });
+  document.getElementById('noteSave').addEventListener('click', async () => {
+    const note = document.getElementById('noteText').value;
+    try {
+      detailRecipe = await api('/api/recipes/' + r.id, {
+        method: 'PATCH', body: JSON.stringify({ note }),
+      });
+      toast('Note saved');
+    } catch (err) { toast(err.message); }
+  });
+}
+
 // ---------------- navigation ----------------
-const routes = { home: renderHome, favorites: renderHome };
+const routes = { home: renderHome, favorites: renderHome, detail: renderDetail };
 
 function setActiveTab() {
   document.querySelectorAll('#tabbar .tab').forEach(t => {
