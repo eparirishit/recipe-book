@@ -240,8 +240,176 @@ async function renderDetail(id) {
   });
 }
 
+// ---------------- cooking mode ----------------
+let cookRecipe = null;
+let cookIdx = 0;
+let wakeLock = null;
+let timerState = null; // { total, remaining, intervalId, label }
+
+function findDurations(step) {
+  // matches "10–12 minutes", "2-3 mins", "30 minutes", "1 hour"
+  const re = /(\d+)\s*(?:[-–—]|to)\s*(\d+)\s*(minutes?|mins?|hours?|hrs?)|(\d+)\s*(minutes?|mins?|hours?|hrs?)/gi;
+  const out = [];
+  let m;
+  while ((m = re.exec(step)) !== null) {
+    const unit = (m[3] || m[5] || '').toLowerCase();
+    const mult = unit.startsWith('h') ? 3600 : 60;
+    const secs = parseInt(m[2] || m[4], 10) * mult; // upper bound of a range
+    const label = m[2] ? `${m[1]}–${m[2]} ${m[3]}` : `${m[4]} ${m[5]}`;
+    if (secs > 0 && secs <= 12 * 3600) out.push({ label, seconds: secs });
+  }
+  return out;
+}
+
+function fmtClock(s) {
+  s = Math.max(0, Math.ceil(s));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(sec).padStart(2, '0');
+}
+
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+    [0, 0.35, 0.7].forEach(t => {
+      o.frequency.setValueAtTime(880, ctx.currentTime + t);
+    });
+    o.start(); o.stop(ctx.currentTime + 1.1);
+  } catch (e) { /* audio unavailable */ }
+}
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (e) { /* not supported / denied */ }
+}
+
+function releaseWakeLock() {
+  try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch (e) {}
+  stopTimer();
+}
+
+function stopTimer() {
+  if (timerState && timerState.intervalId) clearInterval(timerState.intervalId);
+  timerState = null;
+}
+
+function renderCookStep() {
+  const steps = cookRecipe.method;
+  const step = steps[cookIdx];
+  const timers = findDurations(step);
+
+  document.getElementById('cookStepNum').textContent = `Step ${cookIdx + 1} of ${steps.length}`;
+  document.getElementById('cookStepText').textContent = step;
+  document.getElementById('cookBar').style.width = `${((cookIdx + 1) / steps.length) * 100}%`;
+  document.getElementById('cookCount').textContent = `${cookIdx + 1} / ${steps.length}`;
+  document.getElementById('prevBtn').disabled = cookIdx === 0;
+  document.getElementById('nextBtn').textContent = cookIdx === steps.length - 1 ? 'Finish' : 'Next';
+  document.getElementById('nextBtn').classList.toggle('primary', cookIdx === steps.length - 1);
+
+  const chipWrap = document.getElementById('timerChip');
+  stopTimer();
+  if (timers.length) {
+    const t = timers[0];
+    chipWrap.style.display = '';
+    chipWrap.innerHTML = `
+      <div><div class="t-label">${esc(t.label)}</div><div class="t-time" id="tTime">${fmtClock(t.seconds)}</div></div>
+      <button id="tBtn">Start timer</button>`;
+    document.getElementById('tBtn').addEventListener('click', () => toggleTimer(t));
+  } else {
+    chipWrap.style.display = 'none';
+    chipWrap.innerHTML = '';
+  }
+}
+
+function toggleTimer(t) {
+  const btn = document.getElementById('tBtn');
+  const timeEl = document.getElementById('tTime');
+  if (timerState && timerState.running) {
+    clearInterval(timerState.intervalId);
+    timerState.running = false;
+    btn.textContent = 'Resume';
+    return;
+  }
+  if (!timerState) timerState = { remaining: t.seconds, running: false, intervalId: null };
+  timerState.running = true;
+  btn.textContent = 'Pause';
+  const endAt = Date.now() + timerState.remaining * 1000;
+  timerState.intervalId = setInterval(() => {
+    timerState.remaining = Math.max(0, (endAt - Date.now()) / 1000);
+    timeEl.textContent = fmtClock(timerState.remaining);
+    if (timerState.remaining <= 0) {
+      clearInterval(timerState.intervalId);
+      timerState = null;
+      btn.textContent = 'Start timer';
+      beep();
+      toast("Time's up!");
+    }
+  }, 250);
+}
+
+async function renderCooking(id) {
+  if (!detailRecipe || detailRecipe.id !== Number(id)) {
+    detailRecipe = await api('/api/recipes/' + id);
+  }
+  cookRecipe = detailRecipe;
+  cookIdx = 0;
+  tabbar.style.display = 'none';
+
+  view.innerHTML = `
+    <div class="cook">
+      <div class="cook-top">
+        <button class="exit" id="cookExit">Exit</button>
+        <span style="font-size:13px;opacity:0.75">${esc(cookRecipe.title)}</span>
+      </div>
+      <div class="cook-progress">
+        <div class="bar"><i id="cookBar"></i></div>
+        <div class="lbl" id="cookCount"></div>
+      </div>
+      <div class="cook-step">
+        <div class="stepnum" id="cookStepNum"></div>
+        <p id="cookStepText"></p>
+      </div>
+      <div class="timer-chip" id="timerChip" style="display:none"></div>
+      <details class="cook-ingredients">
+        <summary>Ingredients quick reference</summary>
+        <ul>${cookRecipe.ingredients.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
+      </details>
+      <div class="cook-nav">
+        <button class="btn" id="prevBtn">Back</button>
+        <button class="btn primary" id="nextBtn">Next</button>
+      </div>
+    </div>`;
+
+  renderCookStep();
+  requestWakeLock();
+
+  document.getElementById('cookExit').addEventListener('click', () => {
+    releaseWakeLock();
+    go('detail', cookRecipe.id);
+  });
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    if (cookIdx > 0) { cookIdx--; renderCookStep(); }
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (cookIdx < cookRecipe.method.length - 1) { cookIdx++; renderCookStep(); }
+    else { releaseWakeLock(); go('detail', cookRecipe.id); toast('Enjoy your meal!'); }
+  });
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.tab === 'cooking') requestWakeLock();
+});
+
 // ---------------- navigation ----------------
-const routes = { home: renderHome, favorites: renderHome, detail: renderDetail };
+const routes = { home: renderHome, favorites: renderHome, detail: renderDetail, cooking: renderCooking };
 
 function setActiveTab() {
   document.querySelectorAll('#tabbar .tab').forEach(t => {
