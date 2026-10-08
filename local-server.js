@@ -171,7 +171,8 @@ app.delete(
   })
 );
 
-// Clear checked items (DELETE /api/grocery?checked=1).
+// Clear grocery items: ?checked=1 clears checked, ?recipeId=X clears one
+// recipe's group, no query clears everything.
 app.delete(
   '/api/grocery',
   ah(async (req, res) => {
@@ -179,7 +180,10 @@ app.delete(
     if (req.query.checked === '1') {
       return res.json({ cleared: await db.groceryClearChecked() });
     }
-    return res.status(400).json({ error: 'Use ?checked=1 to clear checked items' });
+    if (req.query.recipeId) {
+      return res.json({ cleared: await db.groceryClearRecipe(req.query.recipeId) });
+    }
+    return res.json({ cleared: await db.groceryClearAll() });
   })
 );
 

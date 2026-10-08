@@ -37,6 +37,15 @@ function esc(s) {
 
 function pad2(n) { return String(n).padStart(2, '0'); }
 
+// Link @handles in a source line to their Instagram profiles.
+function linkHandles(text) {
+  return esc(text).replace(/@([A-Za-z0-9._]+)/g, (m, h) => {
+    const handle = h.replace(/[.]+$/, '');
+    const tail = m.slice(1 + handle.length);
+    return `<a href="https://instagram.com/${handle}" target="_blank" rel="noopener">@${handle}</a>${esc(tail)}`;
+  });
+}
+
 async function api(path, opts = {}) {
   const res = await fetch(path, {
     ...opts,
@@ -49,12 +58,23 @@ async function api(path, opts = {}) {
   return res.json();
 }
 
+async function updateGroceryBadge() {
+  try {
+    const groups = await api('/api/grocery');
+    const n = groups.reduce((s, g) => s + g.items.length, 0);
+    const b = document.getElementById('groceryBadge');
+    if (!b) return;
+    b.hidden = n === 0;
+    b.textContent = n;
+  } catch (e) { /* badge stays as-is */ }
+}
+
 let toastTimer;
 function toast(msg) {
   toastEl.textContent = msg;
   toastEl.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3000);
 }
 
 const ICONS = {
@@ -66,6 +86,7 @@ const ICONS = {
   serves: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   basket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8Z"/><path d="M8.5 10V6.5a3.5 3.5 0 0 1 7 0V10"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>',
 };
 
 // ---------------- home feed ----------------
@@ -213,6 +234,7 @@ async function renderDetail(id) {
       <button class="btn btn-outline ${r.favorite ? 'active' : ''}" id="favBtn" aria-label="Toggle favorite">${r.favorite ? ICONS.heartSolid : ICONS.heart}</button>
       <button class="btn btn-outline" id="grocBtn" aria-label="Add ingredients to grocery list" title="Add ingredients to grocery list">${ICONS.basket}</button>
     </div>
+    ${r.source ? `<p class="source-line">${linkHandles(r.source)}</p>` : ''}
     <div class="detail-sec">
       <h3>Ingredients <span class="count">${r.ingredients.length}</span></h3>
       <ul class="ing-list" id="ingList">
@@ -225,7 +247,6 @@ async function renderDetail(id) {
         ${r.method.map(s => `<li>${esc(s)}</li>`).join('')}
       </ol>
     </div>
-    ${r.source ? `<div class="detail-sec"><p class="source-line">${esc(r.source)}</p></div>` : ''}
     <div class="note-box">
       <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:12px;">My notes</h3>
       <textarea id="noteText" placeholder="How did it turn out? Tweaks for next time…">${esc(r.note || '')}</textarea>
@@ -248,7 +269,8 @@ async function renderDetail(id) {
   document.getElementById('grocBtn').addEventListener('click', async () => {
     try {
       const res = await api('/api/grocery', { method: 'POST', body: JSON.stringify({ recipeId: r.id }) });
-      toast(`${res.added} ingredients added to grocery list`);
+      toast(`${res.added} ingredient${res.added === 1 ? '' : 's'} added to grocery list`);
+      updateGroceryBadge();
     } catch (err) { toast(err.message); }
   });
   document.getElementById('ingList').addEventListener('click', e => {
@@ -270,6 +292,7 @@ async function renderDetail(id) {
 // ---------------- cooking mode ----------------
 let cookRecipe = null;
 let cookIdx = 0;
+let cookShowIng = false;
 let wakeLock = null;
 let timerState = null; // { total, remaining, intervalId, label }
 
@@ -333,49 +356,45 @@ function renderCookStep() {
   const step = steps[cookIdx];
   const timers = findDurations(step);
 
-  document.getElementById('cookStepNum').textContent = `Step ${cookIdx + 1} of ${steps.length}`;
+  document.getElementById('cookStepCount').textContent = `Step ${cookIdx + 1} of ${steps.length}`;
   document.getElementById('cookStepText').textContent = step;
   document.getElementById('cookBar').style.width = `${((cookIdx + 1) / steps.length) * 100}%`;
-  document.getElementById('cookCount').textContent = `${cookIdx + 1} / ${steps.length}`;
   document.getElementById('prevBtn').disabled = cookIdx === 0;
-  document.getElementById('nextBtn').textContent = cookIdx === steps.length - 1 ? 'Finish' : 'Next';
-  document.getElementById('nextBtn').classList.toggle('primary', cookIdx === steps.length - 1);
+  document.getElementById('nextBtn').textContent = cookIdx === steps.length - 1 ? 'Finish' : 'Next step';
 
   const chipWrap = document.getElementById('timerChip');
   stopTimer();
   if (timers.length) {
     const t = timers[0];
-    chipWrap.style.display = '';
     chipWrap.innerHTML = `
-      <div><div class="t-label">${esc(t.label)}</div><div class="t-time" id="tTime">${fmtClock(t.seconds)}</div></div>
-      <button id="tBtn">Start timer</button>`;
+      <button class="timer-chip" id="tBtn">${ICONS.clock}<span id="tLabel">Start ${esc(t.label)} timer</span></button>
+      <div class="t-time" id="tTime">${fmtClock(t.seconds)}</div>`;
     document.getElementById('tBtn').addEventListener('click', () => toggleTimer(t));
   } else {
-    chipWrap.style.display = 'none';
     chipWrap.innerHTML = '';
   }
 }
 
 function toggleTimer(t) {
-  const btn = document.getElementById('tBtn');
+  const labelEl = document.getElementById('tLabel');
   const timeEl = document.getElementById('tTime');
   if (timerState && timerState.running) {
     clearInterval(timerState.intervalId);
     timerState.running = false;
-    btn.textContent = 'Resume';
+    if (labelEl) labelEl.textContent = `Resume ${fmtClock(timerState.remaining)}`;
     return;
   }
   if (!timerState) timerState = { remaining: t.seconds, running: false, intervalId: null };
   timerState.running = true;
-  btn.textContent = 'Pause';
+  if (labelEl) labelEl.textContent = 'Pause';
   const endAt = Date.now() + timerState.remaining * 1000;
   timerState.intervalId = setInterval(() => {
     timerState.remaining = Math.max(0, (endAt - Date.now()) / 1000);
-    timeEl.textContent = fmtClock(timerState.remaining);
+    if (timeEl) timeEl.textContent = fmtClock(timerState.remaining);
     if (timerState.remaining <= 0) {
       clearInterval(timerState.intervalId);
       timerState = null;
-      btn.textContent = 'Start timer';
+      if (labelEl) labelEl.textContent = "Time's up — tap to restart";
       beep();
       toast("Time's up!");
     }
@@ -388,30 +407,29 @@ async function renderCooking(id) {
   }
   cookRecipe = detailRecipe;
   cookIdx = 0;
+  cookShowIng = false;
   tabbar.style.display = 'none';
 
   view.innerHTML = `
     <div class="cook">
       <div class="cook-top">
-        <button class="exit" id="cookExit">Exit</button>
-        <span style="font-size:13px;opacity:0.75">${esc(cookRecipe.title)}</span>
+        <span class="title">${esc(cookRecipe.title)}</span>
+        <button class="icon-btn" id="ingToggle" aria-label="Toggle ingredients" aria-pressed="false">${ICONS.list}</button>
+        <button class="icon-btn" id="cookExit" aria-label="Exit cooking mode">${ICONS.x}</button>
       </div>
-      <div class="cook-progress">
-        <div class="bar"><i id="cookBar"></i></div>
-        <div class="lbl" id="cookCount"></div>
+      <div class="cook-progress"><div class="bar"><i id="cookBar"></i></div></div>
+      <div class="cook-step-count" id="cookStepCount"></div>
+      <div class="cook-body">
+        <p class="cook-step" id="cookStepText"></p>
+        <div id="timerChip"></div>
+        <div class="cook-ing" id="cookIng" hidden>
+          <h4>Ingredients</h4>
+          <ul>${cookRecipe.ingredients.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
+        </div>
       </div>
-      <div class="cook-step">
-        <div class="stepnum" id="cookStepNum"></div>
-        <p id="cookStepText"></p>
-      </div>
-      <div class="timer-chip" id="timerChip" style="display:none"></div>
-      <details class="cook-ingredients">
-        <summary>Ingredients quick reference</summary>
-        <ul>${cookRecipe.ingredients.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
-      </details>
       <div class="cook-nav">
-        <button class="btn" id="prevBtn">Back</button>
-        <button class="btn primary" id="nextBtn">Next</button>
+        <button class="btn btn-outline" id="prevBtn">Back</button>
+        <button class="btn btn-primary" id="nextBtn">Next step</button>
       </div>
     </div>`;
 
@@ -422,13 +440,40 @@ async function renderCooking(id) {
     releaseWakeLock();
     go('detail', cookRecipe.id);
   });
+  document.getElementById('ingToggle').addEventListener('click', e => {
+    cookShowIng = !cookShowIng;
+    document.getElementById('cookIng').hidden = !cookShowIng;
+    e.currentTarget.setAttribute('aria-pressed', String(cookShowIng));
+    e.currentTarget.classList.toggle('active', cookShowIng);
+  });
   document.getElementById('prevBtn').addEventListener('click', () => {
-    if (cookIdx > 0) { cookIdx--; renderCookStep(); }
+    if (cookIdx > 0) { stopTimer(); cookIdx--; renderCookStep(); }
   });
   document.getElementById('nextBtn').addEventListener('click', () => {
+    stopTimer();
     if (cookIdx < cookRecipe.method.length - 1) { cookIdx++; renderCookStep(); }
-    else { releaseWakeLock(); go('detail', cookRecipe.id); toast('Enjoy your meal!'); }
+    else { renderCookDone(); }
   });
+}
+
+function renderCookDone() {
+  releaseWakeLock();
+  view.innerHTML = `
+    <div class="cook">
+      <div class="cook-top">
+        <span class="title">${esc(cookRecipe.title)}</span>
+        <button class="icon-btn" id="cookExit" aria-label="Exit cooking mode">${ICONS.x}</button>
+      </div>
+      <div class="cook-progress"><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="cook-body"><div class="cook-done">
+        <p class="done-title">That's the last step.</p>
+        <p>Plate it up while it's hot — and jot a note on the recipe page so next time is even better.</p>
+        <button class="btn btn-primary" id="cookDoneBtn">Back to the recipe</button>
+      </div></div>
+    </div>`;
+  const back = () => go('detail', cookRecipe.id);
+  document.getElementById('cookExit').addEventListener('click', back);
+  document.getElementById('cookDoneBtn').addEventListener('click', back);
 }
 
 document.addEventListener('visibilitychange', () => {
@@ -439,55 +484,69 @@ document.addEventListener('visibilitychange', () => {
 async function renderGrocery() {
   const groups = await api('/api/grocery');
   const total = groups.reduce((n, g) => n + g.items.length, 0);
-  const checkedCount = groups.reduce((n, g) => n + g.items.filter(i => i.checked).length, 0);
 
   view.innerHTML = `
     <div class="page-head">
       <div class="kicker">Shopping</div>
       <h1>Grocery List</h1>
-      <p class="sub">${total ? `${checkedCount} of ${total} checked` : 'Add ingredients from any recipe.'}</p>
+      <p class="sub">Ingredients gathered from your recipes, grouped by dish.</p>
     </div>
-    ${total ? `<div class="grocery-actions">
-      <button class="btn btn-outline" id="clearChecked" style="flex:1">Clear checked</button>
-    </div>` : ''}
+    <div id="grocery-body">
     ${groups.length ? groups.map(g => `
       <div class="grocery-group">
-        <h3>${esc(g.recipeTitle)}</h3>
+        <header>
+          ${g.recipeNumber != null ? `<span class="g-num">No. ${pad2(g.recipeNumber)}</span>` : ''}
+          <span class="g-title">${esc(g.recipeTitle)}</span>
+          <button class="g-remove" data-gr="${g.recipeId}">Remove</button>
+        </header>
         <ul>
           ${g.items.map(it => `
             <li class="${it.checked ? 'done' : ''}" data-id="${it.id}">
-              <span class="checkbox" data-check style="cursor:pointer"></span>
-              <span class="g-label">${esc(it.label)}</span>
-              <button class="del" data-del aria-label="Remove">${ICONS.x}</button>
+              <span class="checkbox" data-check></span><span class="g-label">${esc(it.label)}</span>
             </li>`).join('')}
         </ul>
-      </div>`).join('')
-      : `<div class="empty"><div class="big">List is empty</div><p>Open a recipe and tap the basket icon to add its ingredients.</p></div>`}`;
+      </div>`).join('') + `
+      <div class="grocery-actions">
+        <button class="btn btn-outline" id="gClearDone">Clear ticked items</button>
+        <button class="btn btn-outline" id="gClearAll">Clear list</button>
+      </div>`
+      : `<div class="empty"><div class="big">The basket is empty</div>
+        <p>Open a recipe and tap the basket icon — everything you need lands here, grouped by dish.</p></div>`}
+    </div>`;
 
-  const clearBtn = document.getElementById('clearChecked');
-  if (clearBtn) clearBtn.addEventListener('click', async () => {
+  const doneBtn = document.getElementById('gClearDone');
+  if (doneBtn) doneBtn.addEventListener('click', async () => {
     await api('/api/grocery?checked=1', { method: 'DELETE' });
-    toast('Checked items cleared');
+    toast('Ticked items cleared');
+    updateGroceryBadge();
+    renderGrocery();
+  });
+  const allBtn = document.getElementById('gClearAll');
+  if (allBtn) allBtn.addEventListener('click', async () => {
+    await api('/api/grocery', { method: 'DELETE' });
+    toast('Grocery list cleared');
+    updateGroceryBadge();
     renderGrocery();
   });
 
-  view.querySelectorAll('.grocery-group').forEach(groupEl => {
-    groupEl.addEventListener('click', async e => {
-      const li = e.target.closest('li');
-      if (!li) return;
+  view.querySelectorAll('[data-gr]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      await api('/api/grocery?recipeId=' + btn.dataset.gr, { method: 'DELETE' });
+      toast('Removed from grocery list');
+      updateGroceryBadge();
+      renderGrocery();
+    });
+  });
+
+  view.querySelectorAll('#grocery-body li[data-id]').forEach(li => {
+    li.addEventListener('click', async () => {
       const id = li.dataset.id;
-      if (e.target.closest('[data-del]')) {
-        await api('/api/grocery/' + id, { method: 'DELETE' });
-        li.remove();
-        return;
-      }
-      if (e.target.closest('[data-check]') || e.target.closest('.g-label')) {
-        const nowDone = !li.classList.contains('done');
-        const updated = await api('/api/grocery/' + id, {
-          method: 'PATCH', body: JSON.stringify({ checked: nowDone }),
-        });
-        li.classList.toggle('done', updated.checked);
-      }
+      const nowDone = !li.classList.contains('done');
+      const updated = await api('/api/grocery/' + id, {
+        method: 'PATCH', body: JSON.stringify({ checked: nowDone }),
+      });
+      li.classList.toggle('done', updated.checked);
     });
   });
 }
@@ -592,6 +651,7 @@ async function init() {
     view.innerHTML = `<div class="empty"><div class="big">Couldn't reach the server</div><p>${esc(e.message)}</p></div>`;
     return;
   }
+  updateGroceryBadge();
   await go('home');
 }
 

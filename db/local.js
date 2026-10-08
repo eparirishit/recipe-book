@@ -166,13 +166,25 @@ function createLocalDb() {
 
     // Grocery list, grouped by recipe.
     async groceryList() {
-      const items = db.prepare('SELECT * FROM grocery_items ORDER BY recipe_title, id').all();
+      const items = db
+        .prepare(
+          `SELECT g.*, r.number AS recipe_number
+           FROM grocery_items g
+           LEFT JOIN recipes r ON r.id = g.recipe_id
+           ORDER BY recipe_title, id`
+        )
+        .all();
       const groups = [];
       const byRecipe = new Map();
       for (const it of items) {
         const key = it.recipe_id ?? `other-${it.recipe_title}`;
         if (!byRecipe.has(key)) {
-          const g = { recipeId: it.recipe_id, recipeTitle: it.recipe_title, items: [] };
+          const g = {
+            recipeId: it.recipe_id,
+            recipeTitle: it.recipe_title,
+            recipeNumber: it.recipe_number ?? null,
+            items: [],
+          };
           byRecipe.set(key, g);
           groups.push(g);
         }
@@ -209,6 +221,16 @@ function createLocalDb() {
 
     async groceryClearChecked() {
       const info = db.prepare('DELETE FROM grocery_items WHERE checked = 1').run();
+      return info.changes;
+    },
+
+    async groceryClearRecipe(recipeId) {
+      const info = db.prepare('DELETE FROM grocery_items WHERE recipe_id = ?').run(recipeId);
+      return info.changes;
+    },
+
+    async groceryClearAll() {
+      const info = db.prepare('DELETE FROM grocery_items').run();
       return info.changes;
     },
   };

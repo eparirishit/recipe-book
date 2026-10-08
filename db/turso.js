@@ -180,7 +180,12 @@ function createTursoDb() {
 
     async groceryList() {
       await schemaReady;
-      const rs = await client.execute('SELECT * FROM grocery_items ORDER BY recipe_title, id');
+      const rs = await client.execute(
+        `SELECT g.*, r.number AS recipe_number
+         FROM grocery_items g
+         LEFT JOIN recipes r ON r.id = g.recipe_id
+         ORDER BY recipe_title, id`
+      );
       const groups = [];
       const byRecipe = new Map();
       for (const it of rs.rows) {
@@ -189,6 +194,7 @@ function createTursoDb() {
           const g = {
             recipeId: it.recipe_id == null ? null : Number(it.recipe_id),
             recipeTitle: it.recipe_title,
+            recipeNumber: it.recipe_number == null ? null : Number(it.recipe_number),
             items: [],
           };
           byRecipe.set(key, g);
@@ -247,6 +253,21 @@ function createTursoDb() {
     async groceryClearChecked() {
       await schemaReady;
       const rs = await client.execute('DELETE FROM grocery_items WHERE checked = 1');
+      return rs.rowsAffected ?? 0;
+    },
+
+    async groceryClearRecipe(recipeId) {
+      await schemaReady;
+      const rs = await client.execute({
+        sql: 'DELETE FROM grocery_items WHERE recipe_id = ?',
+        args: [recipeId],
+      });
+      return rs.rowsAffected ?? 0;
+    },
+
+    async groceryClearAll() {
+      await schemaReady;
+      const rs = await client.execute('DELETE FROM grocery_items');
       return rs.rowsAffected ?? 0;
     },
   };

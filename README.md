@@ -55,5 +55,7 @@ LEDGER.md          implementation tracker (TODO / IN PROGRESS / DONE)
 - `GET /api/recipes/:id`
 - `POST /api/recipes` — manual add
 - `PATCH /api/recipes/:id` — `{favorite, note}`
-- `GET /api/grocery` · `POST /api/grocery {recipeId}` ·
-  `PATCH /api/grocery/:itemId {checked}` · `DELETE /api/grocery/:itemId`
+- `GET /api/grocery` (groups include `recipeNumber`) · `POST /api/grocery {recipeId}` ·
+  `PATCH /api/grocery/:itemId {checked}` · `DELETE /api/grocery/:itemId` ·
+  `DELETE /api/grocery?checked=1` (clear ticked) · `DELETE /api/grocery?recipeId=X`
+  (remove one recipe's group) · `DELETE /api/grocery` (clear all)
