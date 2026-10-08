@@ -52,7 +52,7 @@ LEDGER.md          implementation tracker (TODO / IN PROGRESS / DONE)
 
 ## API
 - `GET /api/recipes?q=&category=&maxTime=&favoritesOnly=&servesMin=` (servesMin: min servings; uses max int in serves string)
-- `GET /api/recipes/:id`
+- `GET /api/recipes/:id` (includes `sourceUrl` — the original Instagram reel/post URL)
 - `POST /api/recipes` — manual add
 - `PATCH /api/recipes/:id` — `{favorite, note}`
 - `GET /api/grocery` (groups include `recipeNumber`) · `POST /api/grocery {recipeId}` ·

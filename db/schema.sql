@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS recipes (
   ingredients TEXT NOT NULL DEFAULT '[]',  -- JSON array of strings
   method      TEXT NOT NULL DEFAULT '[]',  -- JSON array of strings
   source      TEXT,
+  source_url  TEXT,                 -- original Instagram reel/post URL
   favorite    INTEGER NOT NULL DEFAULT 0,
   note        TEXT NOT NULL DEFAULT '',
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))

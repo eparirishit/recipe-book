@@ -89,6 +89,9 @@ const ICONS = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>',
 };
 
+// Decorative banner motif (from the prototype) for recipe card art.
+const DECO = '<svg class="deco" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="rgba(255,252,240,0.85)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c6-1 14-7 16-16-9 2-15 10-16 16Z"/><path d="M4 20C7 14 11 9 17 5"/></svg>';
+
 // ---------------- home feed ----------------
 async function loadHomeData() {
   const params = new URLSearchParams();
@@ -104,6 +107,7 @@ function cardHTML(r) {
   return `
   <button class="card" data-id="${r.id}">
     <div class="card-art" style="background:${catGradient(r.category)}">
+      ${DECO}
       <span class="num">${pad2(r.number)}</span>
       <span class="cat">${esc(r.category)}</span>
     </div>
@@ -221,6 +225,7 @@ async function renderDetail(id) {
   view.innerHTML = `
     <button class="back-link" id="backBtn">${ICONS.back}All recipes</button>
     <div class="detail-hero" style="background:${catGradient(r.category)}">
+      ${DECO}
       <div class="crumb">Recipe ${pad2(r.number)} · ${esc(r.category)}</div>
       <h1>${esc(r.title)}</h1>
       <div class="meta">
@@ -234,7 +239,7 @@ async function renderDetail(id) {
       <button class="btn btn-outline ${r.favorite ? 'active' : ''}" id="favBtn" aria-label="Toggle favorite">${r.favorite ? ICONS.heartSolid : ICONS.heart}</button>
       <button class="btn btn-outline" id="grocBtn" aria-label="Add ingredients to grocery list" title="Add ingredients to grocery list">${ICONS.basket}</button>
     </div>
-    ${r.source ? `<p class="source-line">${linkHandles(r.source)}</p>` : ''}
+    ${r.source ? `<p class="source-line">${linkHandles(r.source)}${r.sourceUrl ? ` · <a class="watch-link" href="${esc(r.sourceUrl)}" target="_blank" rel="noopener">Watch the reel ↗</a>` : ''}</p>` : ''}
     <div class="detail-sec">
       <h3>Ingredients <span class="count">${r.ingredients.length}</span></h3>
       <ul class="ing-list" id="ingList">
@@ -367,8 +372,7 @@ function renderCookStep() {
   if (timers.length) {
     const t = timers[0];
     chipWrap.innerHTML = `
-      <button class="timer-chip" id="tBtn">${ICONS.clock}<span id="tLabel">Start ${esc(t.label)} timer</span></button>
-      <div class="t-time" id="tTime">${fmtClock(t.seconds)}</div>`;
+      <button class="timer-chip" id="tBtn">${ICONS.clock}<span id="tLabel">Start ${esc(t.label)} timer</span></button>`;
     document.getElementById('tBtn').addEventListener('click', () => toggleTimer(t));
   } else {
     chipWrap.innerHTML = '';
@@ -377,20 +381,18 @@ function renderCookStep() {
 
 function toggleTimer(t) {
   const labelEl = document.getElementById('tLabel');
-  const timeEl = document.getElementById('tTime');
   if (timerState && timerState.running) {
     clearInterval(timerState.intervalId);
     timerState.running = false;
-    if (labelEl) labelEl.textContent = `Resume ${fmtClock(timerState.remaining)}`;
+    if (labelEl) labelEl.textContent = `Resume · ${fmtClock(timerState.remaining)}`;
     return;
   }
   if (!timerState) timerState = { remaining: t.seconds, running: false, intervalId: null };
   timerState.running = true;
-  if (labelEl) labelEl.textContent = 'Pause';
   const endAt = Date.now() + timerState.remaining * 1000;
-  timerState.intervalId = setInterval(() => {
+  const tick = () => {
     timerState.remaining = Math.max(0, (endAt - Date.now()) / 1000);
-    if (timeEl) timeEl.textContent = fmtClock(timerState.remaining);
+    if (labelEl) labelEl.textContent = fmtClock(timerState.remaining);
     if (timerState.remaining <= 0) {
       clearInterval(timerState.intervalId);
       timerState = null;
@@ -398,7 +400,9 @@ function toggleTimer(t) {
       beep();
       toast("Time's up!");
     }
-  }, 250);
+  };
+  timerState.intervalId = setInterval(tick, 250);
+  tick();
 }
 
 async function renderCooking(id) {

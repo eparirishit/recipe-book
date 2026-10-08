@@ -27,6 +27,7 @@ function rowToRecipe(row) {
     ingredients: safeParse(row.ingredients, []),
     method: safeParse(row.method, []),
     source: row.source,
+    sourceUrl: row.source_url || '',
     favorite: !!row.favorite,
     note: row.note || '',
   };
@@ -61,7 +62,28 @@ function createTursoDb() {
     for (const sql of statements) {
       await client.execute(sql);
     }
+    // Migrate older DBs that predate the source_url column.
+    try {
+      await client.execute('ALTER TABLE recipes ADD COLUMN source_url TEXT');
+    } catch (e) {
+      if (!/duplicate column/i.test(e.message || '')) throw e;
+    }
   })();
+
+  // Backfill reel URLs for seeded recipes (idempotent; runs on every boot).
+  const backfillSourceUrls = async () => {
+    const raw = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'data', 'recipes.json'), 'utf8')
+    );
+    await client.batch(
+      raw
+        .filter((r) => r.sourceUrl)
+        .map((r) => ({
+          sql: 'UPDATE recipes SET source_url = ? WHERE number = ?',
+          args: [r.sourceUrl, parseInt(String(r.number), 10)],
+        }))
+    );
+  };
 
   return {
     kind: 'turso',
@@ -70,34 +92,41 @@ function createTursoDb() {
       await schemaReady;
       const rs = await client.execute('SELECT COUNT(*) AS c FROM recipes');
       const c = Number(rs.rows[0].c);
-      if (c > 0) return { seeded: false, count: c };
-      const raw = JSON.parse(
-        fs.readFileSync(path.join(__dirname, '..', 'data', 'recipes.json'), 'utf8')
-      );
-      await client.batch(
-        raw.map((r) => {
-          const number = parseInt(String(r.number), 10);
-          return {
-            sql: `INSERT INTO recipes
-                    (id, number, title, category, serves, time, description,
-                     ingredients, method, source, favorite, note)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '')`,
-            args: [
-              number,
-              number,
-              r.title || '',
-              r.category || 'Uncategorized',
-              r.serves || '',
-              r.time || '',
-              r.description || '',
-              JSON.stringify(r.ingredients || []),
-              JSON.stringify(r.method || []),
-              r.source || '',
-            ],
-          };
-        })
-      );
-      return { seeded: true, count: raw.length };
+      let result;
+      if (c > 0) {
+        result = { seeded: false, count: c };
+      } else {
+        const raw = JSON.parse(
+          fs.readFileSync(path.join(__dirname, '..', 'data', 'recipes.json'), 'utf8')
+        );
+        await client.batch(
+          raw.map((r) => {
+            const number = parseInt(String(r.number), 10);
+            return {
+              sql: `INSERT INTO recipes
+                      (id, number, title, category, serves, time, description,
+                       ingredients, method, source, source_url, favorite, note)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '')`,
+              args: [
+                number,
+                number,
+                r.title || '',
+                r.category || 'Uncategorized',
+                r.serves || '',
+                r.time || '',
+                r.description || '',
+                JSON.stringify(r.ingredients || []),
+                JSON.stringify(r.method || []),
+                r.source || '',
+                r.sourceUrl || '',
+              ],
+            };
+          })
+        );
+        result = { seeded: true, count: raw.length };
+      }
+      await backfillSourceUrls();
+      return result;
     },
 
     async categories() {
@@ -142,8 +171,8 @@ function createTursoDb() {
       await client.execute({
         sql: `INSERT INTO recipes
                 (id, number, title, category, serves, time, description,
-                 ingredients, method, source, favorite, note)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '')`,
+                 ingredients, method, source, source_url, favorite, note)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '')`,
         args: [
           number,
           number,
@@ -155,6 +184,7 @@ function createTursoDb() {
           JSON.stringify(asLines(data.ingredients)),
           JSON.stringify(asLines(data.method)),
           data.source || '',
+          data.sourceUrl || '',
         ],
       });
       return this.getRecipe(number); // id == number for new recipes

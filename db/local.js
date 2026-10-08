@@ -26,6 +26,7 @@ function rowToRecipe(row) {
     ingredients: safeParse(row.ingredients, []),
     method: safeParse(row.method, []),
     source: row.source,
+    sourceUrl: row.source_url || '',
     favorite: !!row.favorite,
     note: row.note || '',
   };
@@ -46,43 +47,71 @@ function createLocalDb() {
   db.pragma('foreign_keys = ON');
   db.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
 
+  // Migrate older DBs that predate the source_url column.
+  const cols = db.prepare('PRAGMA table_info(recipes)').all().map((c) => c.name);
+  if (!cols.includes('source_url')) {
+    db.exec('ALTER TABLE recipes ADD COLUMN source_url TEXT');
+  }
+
+  // Backfill reel URLs for seeded recipes (idempotent).
+  const backfillSourceUrls = () => {
+    const raw = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'data', 'recipes.json'), 'utf8')
+    );
+    const upd = db.prepare('UPDATE recipes SET source_url = ? WHERE number = ?');
+    const txn = db.transaction((rows) => {
+      for (const r of rows) {
+        if (r.sourceUrl) upd.run(r.sourceUrl, parseInt(String(r.number), 10));
+      }
+    });
+    txn(raw);
+  };
+
   return {
     kind: 'local',
 
     // Idempotent and cheap: a single COUNT(*) decides whether to seed.
+    // Reel URLs are backfilled on every boot so older DBs pick them up.
     async ensureSeeded() {
       const { c } = db.prepare('SELECT COUNT(*) AS c FROM recipes').get();
-      if (c > 0) return { seeded: false, count: c };
-      const raw = JSON.parse(
-        fs.readFileSync(path.join(__dirname, '..', 'data', 'recipes.json'), 'utf8')
-      );
-      const insert = db.prepare(
-        `INSERT INTO recipes
-           (id, number, title, category, serves, time, description,
-            ingredients, method, source, favorite, note)
-         VALUES
-           (@id, @number, @title, @category, @serves, @time, @description,
-            @ingredients, @method, @source, 0, '')`
-      );
-      const txn = db.transaction((rows) => {
-        for (const r of rows) {
-          const number = parseInt(String(r.number), 10);
-          insert.run({
-            id: number,
-            number,
-            title: r.title || '',
-            category: r.category || 'Uncategorized',
-            serves: r.serves || '',
-            time: r.time || '',
-            description: r.description || '',
-            ingredients: JSON.stringify(r.ingredients || []),
-            method: JSON.stringify(r.method || []),
-            source: r.source || '',
-          });
-        }
-      });
-      txn(raw);
-      return { seeded: true, count: raw.length };
+      let result;
+      if (c > 0) {
+        result = { seeded: false, count: c };
+      } else {
+        const raw = JSON.parse(
+          fs.readFileSync(path.join(__dirname, '..', 'data', 'recipes.json'), 'utf8')
+        );
+        const insert = db.prepare(
+          `INSERT INTO recipes
+             (id, number, title, category, serves, time, description,
+              ingredients, method, source, source_url, favorite, note)
+           VALUES
+             (@id, @number, @title, @category, @serves, @time, @description,
+              @ingredients, @method, @source, @source_url, 0, '')`
+        );
+        const txn = db.transaction((rows) => {
+          for (const r of rows) {
+            const number = parseInt(String(r.number), 10);
+            insert.run({
+              id: number,
+              number,
+              title: r.title || '',
+              category: r.category || 'Uncategorized',
+              serves: r.serves || '',
+              time: r.time || '',
+              description: r.description || '',
+              ingredients: JSON.stringify(r.ingredients || []),
+              method: JSON.stringify(r.method || []),
+              source: r.source || '',
+              source_url: r.sourceUrl || '',
+            });
+          }
+        });
+        txn(raw);
+        result = { seeded: true, count: raw.length };
+      }
+      backfillSourceUrls();
+      return result;
     },
 
     async categories() {
@@ -129,8 +158,8 @@ function createLocalDb() {
         .prepare(
           `INSERT INTO recipes
              (id, number, title, category, serves, time, description,
-              ingredients, method, source, favorite, note)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '')`
+              ingredients, method, source, source_url, favorite, note)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '')`
         )
         .run(
           number,
@@ -142,7 +171,8 @@ function createLocalDb() {
           data.description || '',
           JSON.stringify(asLines(data.ingredients)),
           JSON.stringify(asLines(data.method)),
-          data.source || ''
+          data.source || '',
+          data.sourceUrl || ''
         );
       return rowToRecipe(db.prepare('SELECT * FROM recipes WHERE id = ?').get(info.lastInsertRowid));
     },
