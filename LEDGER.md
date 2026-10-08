@@ -68,3 +68,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 - Remaining manual steps (need Rishit's accounts): create Turso DB,
   import repo in Vercel, set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN,
   deploy, verify production.
+
+### DONE (2026-10-07)
+- UI parity fixes: source moved under action bar with Instagram profile hyperlinks (@handles link out); grocery add now fires a 3s toast + updates a count badge on the Grocery tab; grocery section rebuilt to prototype (No. + title + Remove per group, Clear ticked items / Clear list); cooking mode rebuilt to prototype (light theme, header icon buttons, big serif step, pill timer, full ingredients panel, done screen)
