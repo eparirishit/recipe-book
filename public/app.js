@@ -56,11 +56,14 @@ function toast(msg) {
 }
 
 const ICONS = {
-  clock: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.6l4 2.4-.8 1.3L11 13.5V7h2v5.6z"/></svg>',
-  serves: '<svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 0a4 4 0 1 0-.6-7.96A5.99 5.99 0 0 1 12 5a6 6 0 0 1-.4 11.96A3.99 3.99 0 0 0 8 11zm8 2c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4z"/></svg>',
-  heart: '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.9-9.7-9.2C.7 8.6 2.6 5 6 5c2 0 3.4 1.1 4 2.2C10.6 6.1 12 5 14 5c3.4 0 5.3 3.6 3.7 6.8C19.5 16.1 12 21 12 21z"/></svg>',
-  search: '<svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 1 0 4.9 14.3l5 5 1.4-1.4-5-5A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"/></svg>',
-  back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7 1.4-1.4L10.8 12l5.6-5.6L15 5z"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.7C6.4 17 3 13.6 3 9.9 3 7.2 5.1 5 7.7 5c1.7 0 3.3.9 4.3 2.3C13 5.9 14.6 5 16.3 5 18.9 5 21 7.2 21 9.9c0 3.7-3.4 7.1-9 10.8Z"/></svg>',
+  heartSolid: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.7C6.4 17 3 13.6 3 9.9 3 7.2 5.1 5 7.7 5c1.7 0 3.3.9 4.3 2.3C13 5.9 14.6 5 16.3 5 18.9 5 21 7.2 21 9.9c0 3.7-3.4 7.1-9 10.8Z"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 2M9.5 2.5h5"/></svg>',
+  serves: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  basket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8Z"/><path d="M8.5 10V6.5a3.5 3.5 0 0 1 7 0V10"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
 };
 
 // ---------------- home feed ----------------
@@ -81,7 +84,7 @@ function cardHTML(r) {
       <span class="cat">${esc(r.category)}</span>
     </div>
     <div class="card-body">
-      <h2>${r.favorite ? ICONS.heart.replace('<svg', '<svg class="fav-dot"') : ''}${esc(r.title)}</h2>
+      <h2>${r.favorite ? ICONS.heartSolid.replace('<svg', '<svg class="fav-dot"') : ''}${esc(r.title)}</h2>
       <div class="meta">
         ${r.time ? `<span>${ICONS.clock}${esc(r.time)}</span>` : ''}
         ${r.serves ? `<span>${ICONS.serves}Serves ${esc(r.serves)}</span>` : ''}
@@ -182,10 +185,8 @@ async function renderDetail(id) {
     ${r.description ? `<div class="detail-sec"><p class="desc">${esc(r.description)}</p></div>` : ''}
     <div class="action-bar">
       <button class="btn btn-primary" id="cookBtn">Start cooking</button>
-      <button class="btn btn-outline ${r.favorite ? 'active' : ''}" id="favBtn" aria-label="Toggle favorite">${ICONS.heart}</button>
-      <button class="btn btn-outline" id="grocBtn" aria-label="Add ingredients to grocery list" title="Add ingredients to grocery list">
-        <svg viewBox="0 0 24 24"><path d="M6 7V6a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v1h3v2h-3v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9H3V7h3zm2 0h8V6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1z"/></svg>
-      </button>
+      <button class="btn btn-outline ${r.favorite ? 'active' : ''}" id="favBtn" aria-label="Toggle favorite">${r.favorite ? ICONS.heartSolid : ICONS.heart}</button>
+      <button class="btn btn-outline" id="grocBtn" aria-label="Add ingredients to grocery list" title="Add ingredients to grocery list">${ICONS.basket}</button>
     </div>
     <div class="detail-sec">
       <h3>Ingredients <span class="count">${r.ingredients.length}</span></h3>
@@ -215,6 +216,7 @@ async function renderDetail(id) {
       });
       detailRecipe = updated;
       e.currentTarget.classList.toggle('active', updated.favorite);
+      e.currentTarget.innerHTML = updated.favorite ? ICONS.heartSolid : ICONS.heart;
       toast(updated.favorite ? 'Saved to favorites' : 'Removed from favorites');
     } catch (err) { toast(err.message); }
   });
@@ -431,7 +433,7 @@ async function renderGrocery() {
             <li class="${it.checked ? 'done' : ''}" data-id="${it.id}">
               <span class="checkbox" data-check style="cursor:pointer"></span>
               <span class="g-label">${esc(it.label)}</span>
-              <button class="del" data-del aria-label="Remove">×</button>
+              <button class="del" data-del aria-label="Remove">${ICONS.x}</button>
             </li>`).join('')}
         </ul>
       </div>`).join('')

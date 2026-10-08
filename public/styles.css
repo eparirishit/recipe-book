@@ -54,7 +54,7 @@ body {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 999px; padding: 12px 16px; box-shadow: var(--shadow);
 }
-.search-box svg { width: 20px; height: 20px; fill: var(--muted); flex: none; }
+.search-box svg { width: 20px; height: 20px; color: var(--muted); flex: none; }
 .search-box input {
   border: none; outline: none; background: transparent;
   font-size: 16px; width: 100%; color: var(--ink); font-family: inherit;
@@ -105,8 +105,8 @@ body {
 .card-body h2 { font-family: 'Playfair Display', serif; font-size: 19px; margin-bottom: 8px; }
 .meta { display: flex; gap: 14px; color: var(--muted); font-size: 13px; }
 .meta span { display: inline-flex; align-items: center; gap: 5px; }
-.meta svg { width: 14px; height: 14px; fill: var(--muted); }
-.fav-dot { float: right; width: 18px; height: 18px; fill: var(--maroon); }
+.meta svg { width: 14px; height: 14px; color: var(--muted); }
+.fav-dot { float: right; width: 18px; height: 18px; color: var(--maroon); }
 
 /* ---------- detail ---------- */
 .detail-hero { padding: 20px 20px 18px; color: #fff; }
@@ -115,7 +115,7 @@ body {
 }
 .detail-hero h1 { font-family: 'Playfair Display', serif; font-size: 30px; line-height: 1.15; margin-bottom: 10px; }
 .detail-hero .meta { color: rgba(255,255,255,0.9); }
-.detail-hero .meta svg { fill: rgba(255,255,255,0.85); }
+.detail-hero .meta svg { color: rgba(255,255,255,0.85); }
 .detail-sec { padding: 18px 20px 0; }
 .detail-sec h3 {
   font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 12px;
@@ -159,12 +159,11 @@ li.done .checkbox::after {
   flex: 1; border: none; border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 600;
   cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn svg { width: 18px; height: 18px; fill: currentColor; }
+.btn svg { width: 18px; height: 18px; }
 .btn-primary { background: var(--green); color: #fff; }
 .btn-primary:active { background: var(--green-dark); }
 .btn-outline { background: var(--card); border: 1px solid var(--border); color: var(--ink); flex: 0 1 auto; padding: 15px 18px; }
 .btn-outline.active { border-color: var(--maroon); color: var(--maroon); }
-.btn-outline.active svg { fill: var(--maroon); }
 
 .note-box { padding: 18px 20px 0; }
 .note-box textarea {
@@ -220,8 +219,9 @@ li.done .checkbox::after {
 .grocery-group li.done .g-label { text-decoration: line-through; color: var(--muted); }
 .grocery-group .del {
   margin-left: auto; background: none; border: none; color: var(--muted);
-  font-size: 18px; cursor: pointer; padding: 0 4px; flex: none;
+  cursor: pointer; padding: 0 4px; flex: none; display: flex; align-items: center;
 }
+.grocery-group .del svg { width: 16px; height: 16px; }
 .grocery-actions { display: flex; gap: 10px; padding: 16px 20px 0; }
 .empty { text-align: center; padding: 60px 30px; color: var(--muted); }
 .empty .big { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--ink); margin-bottom: 8px; }
@@ -255,15 +255,8 @@ li.done .checkbox::after {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   color: var(--muted); font-size: 11px; font-weight: 500; font-family: inherit;
 }
-.tab svg { width: 24px; height: 24px; fill: currentColor; }
+.tab svg { width: 22px; height: 22px; }
 .tab.active { color: var(--green); }
-.tab.fab { flex: 0 0 76px; }
-.tab.fab svg {
-  width: 52px; height: 52px; fill: #fff; background: var(--maroon);
-  border-radius: 50%; padding: 13px; margin-top: -22px;
-  box-shadow: 0 4px 14px rgba(140, 47, 57, 0.4);
-}
-.tab.fab.active svg { background: var(--green); box-shadow: 0 4px 14px rgba(47, 93, 63, 0.4); }
 
 /* ---------- toast ---------- */
 #toast {
@@ -279,4 +272,4 @@ li.done .checkbox::after {
   color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit;
   padding: 18px 20px 0;
 }
-.back-link svg { width: 16px; height: 16px; fill: currentColor; }
+.back-link svg { width: 16px; height: 16px; }
