@@ -8,6 +8,8 @@ const state = {
   q: '',
   category: '',
   maxTime: '',
+  servesMin: '',
+  favOnly: false,
   categories: [],
   recipes: [],
 };
@@ -72,7 +74,8 @@ async function loadHomeData() {
   if (state.q) params.set('q', state.q);
   if (state.category) params.set('category', state.category);
   if (state.maxTime) params.set('maxTime', state.maxTime);
-  if (state.tab === 'favorites') params.set('favoritesOnly', '1');
+  if (state.servesMin) params.set('servesMin', state.servesMin);
+  if (state.tab === 'favorites' || state.favOnly) params.set('favoritesOnly', '1');
   state.recipes = await api('/api/recipes?' + params.toString());
 }
 
@@ -98,7 +101,7 @@ function renderHome() {
   view.innerHTML = `
     <div class="page-head">
       <div class="kicker">Personal Collection</div>
-      <h1>${isFav ? 'Saved Recipes' : 'Recipe Book'}</h1>
+      <h1>${isFav ? 'Favorites' : 'Recipe Book'}</h1>
       <p class="sub">${isFav ? 'Your favorited recipes, one tap away.' : 'Every recipe worth keeping.'}</p>
     </div>
     <div class="search-wrap">
@@ -108,14 +111,26 @@ function renderHome() {
       <button class="chip ${!state.category ? 'active' : ''}" data-cat="">All</button>
       ${state.categories.map(c => `<button class="chip ${state.category === c ? 'active' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
     </div>
-    <div class="filters-row">
-      <select id="maxTime" aria-label="Max cooking time">
-        <option value="">Any time</option>
-        <option value="15" ${state.maxTime === '15' ? 'selected' : ''}>Under 15 min</option>
-        <option value="30" ${state.maxTime === '30' ? 'selected' : ''}>Under 30 min</option>
-        <option value="45" ${state.maxTime === '45' ? 'selected' : ''}>Under 45 min</option>
-        <option value="60" ${state.maxTime === '60' ? 'selected' : ''}>Under 1 hour</option>
-      </select>
+    <button class="fav-toggle" id="favToggle" aria-pressed="${state.favOnly}">${ICONS.heart}Favorites only</button>
+    <div class="filter-row">
+      <div class="field">
+        <label for="maxTime">Max time</label>
+        <select id="maxTime">
+          <option value="">Any time</option>
+          <option value="20" ${state.maxTime === '20' ? 'selected' : ''}>Up to 20 min</option>
+          <option value="35" ${state.maxTime === '35' ? 'selected' : ''}>Up to 35 min</option>
+          <option value="60" ${state.maxTime === '60' ? 'selected' : ''}>Up to 1 hour</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="servesMin">Serves at least</label>
+        <select id="servesMin">
+          <option value="">Any servings</option>
+          <option value="1" ${state.servesMin === '1' ? 'selected' : ''}>1 person</option>
+          <option value="2" ${state.servesMin === '2' ? 'selected' : ''}>2 people</option>
+          <option value="3" ${state.servesMin === '3' ? 'selected' : ''}>3 people</option>
+        </select>
+      </div>
     </div>
     <div class="result-count">${state.recipes.length} recipe${state.recipes.length === 1 ? '' : 's'}</div>
     <div class="cards" id="cards">
@@ -142,6 +157,16 @@ function renderHome() {
   });
   document.getElementById('maxTime').addEventListener('change', e => {
     state.maxTime = e.target.value;
+    refreshHome();
+  });
+  document.getElementById('servesMin').addEventListener('change', e => {
+    state.servesMin = e.target.value;
+    refreshHome();
+  });
+  document.getElementById('favToggle').addEventListener('click', e => {
+    state.favOnly = !state.favOnly;
+    const btn = e.currentTarget;
+    btn.setAttribute('aria-pressed', String(state.favOnly));
     refreshHome();
   });
   document.getElementById('cards').addEventListener('click', e => {
@@ -556,7 +581,7 @@ tabbar.addEventListener('click', e => {
   const btn = e.target.closest('.tab');
   if (!btn) return;
   const tab = btn.dataset.tab;
-  if (tab === 'home') { state.q = ''; state.category = ''; state.maxTime = ''; }
+  if (tab === 'home') { state.q = ''; state.category = ''; state.maxTime = ''; state.servesMin = ''; state.favOnly = false; }
   go(tab);
 });
 
