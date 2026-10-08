@@ -546,6 +546,7 @@ async function go(tab, param) {
   state.tab = tab;
   window.scrollTo(0, 0);
   setActiveTab();
+  if (tab === 'home' || tab === 'favorites') await loadHomeData();
   await fn(param);
 }
 
