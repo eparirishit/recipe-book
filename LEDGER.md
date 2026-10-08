@@ -12,7 +12,7 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 ## TODO (UI parity track)
 - [x] 2026-10-07 — fix(web): load home data on navigation (home opens empty)
 - [x] 2026-10-07 — fix(web): use prototype outline icon set everywhere
-- [ ] feat(api): add servesMin filter to GET /api/recipes
+- [x] 2026-10-07 — feat(api): add servesMin filter to GET /api/recipes
 - [ ] feat(web): add serves filter + favorites-only toggle on home
 - [ ] fix(web): replace add FAB with labeled Add tab; rename Saved to Favorites
 

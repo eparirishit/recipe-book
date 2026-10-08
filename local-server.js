@@ -31,6 +31,14 @@ function parseMinutes(timeStr) {
   return /hr|hour/i.test(m[2]) ? Math.round(value * 60) : Math.round(value);
 }
 
+// Max integer found in a serves string ("3–4 (est.)" -> 4), or null.
+function servesMax(servesStr) {
+  if (!servesStr) return null;
+  const nums = String(servesStr).match(/\d+/g);
+  if (!nums) return null;
+  return Math.max(...nums.map((n) => parseInt(n, 10)));
+}
+
 // ---------- recipe endpoints ----------
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
@@ -46,11 +54,13 @@ app.get(
 // List / search / filter. Newest first (number DESC).
 // q matches title, description, ingredients, method, category.
 // maxTime filters on the leading minutes of the time string.
+// servesMin keeps recipes whose max serves number >= servesMin;
+// recipes with no parseable serves value are excluded when servesMin > 0.
 app.get(
   '/api/recipes',
   ah(async (req, res) => {
     const db = await ready;
-    const { q, category, maxTime, favoritesOnly } = req.query;
+    const { q, category, maxTime, favoritesOnly, servesMin } = req.query;
     let rows = await db.allRecipes({
       q: q || undefined,
       category: category || undefined,
@@ -62,6 +72,15 @@ app.get(
         rows = rows.filter((r) => {
           const t = parseMinutes(r.time);
           return t !== null && t <= max;
+        });
+      }
+    }
+    if (servesMin !== undefined && servesMin !== '') {
+      const min = parseInt(servesMin, 10);
+      if (!Number.isNaN(min) && min > 0) {
+        rows = rows.filter((r) => {
+          const s = servesMax(r.serves);
+          return s !== null && s >= min;
         });
       }
     }

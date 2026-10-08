@@ -51,7 +51,7 @@ LEDGER.md          implementation tracker (TODO / IN PROGRESS / DONE)
 ```
 
 ## API
-- `GET /api/recipes?q=&category=&maxTime=&favoritesOnly=`
+- `GET /api/recipes?q=&category=&maxTime=&favoritesOnly=&servesMin=` (servesMin: min servings; uses max int in serves string)
 - `GET /api/recipes/:id`
 - `POST /api/recipes` — manual add
 - `PATCH /api/recipes/:id` — `{favorite, note}`
