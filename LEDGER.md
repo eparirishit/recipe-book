@@ -74,3 +74,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 
 ### DONE (2026-10-07)
 - Round-3 fixes: cook-nav buttons use natural widths (Back small, Next step wider, matching prototype); timer countdown now shows on the pill button itself (Start → live time → Resume · time → Time's up); every recipe carries its original Instagram reel URL (recovered from chat history) — detail page shows a "Watch the reel ↗" link next to the source; recipe card banners + detail hero carry the prototype's decorative motif
+
+### DONE (2026-10-13)
+- Recipe 17: Spicy Tomato Masala Rice (@bharatzkitchen) added via API with reel URL; seed data updated
