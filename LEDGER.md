@@ -80,3 +80,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 
 ### DONE (2026-10-13)
 - Recipe 18: No Onion No Tomato Chicken Masala (@imkarthi_89) added via API with reel URL; seed data updated
+
+### DONE (2026-10-19)
+- Recipe 19: Garlic Coriander Soup (@ral.livezy, recipe by @theexcitedcookandtraveller) added via API with reel URL; seed data updated
