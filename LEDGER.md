@@ -86,3 +86,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 
 ### DONE (2026-11-08)
 - Recipe 20: Chicken Rasam (@asmazingtales_) added via API with reel URL; seed data updated
+
+### DONE (2026-11-08)
+- Recipe 21: Chilli Garlic Chatpata Maggi (@theunfazedchica) added via API with reel URL; seed data updated
