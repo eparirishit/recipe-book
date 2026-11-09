@@ -89,3 +89,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 
 ### DONE (2026-11-08)
 - Recipe 21: Chilli Garlic Chatpata Maggi (@theunfazedchica) added via API with reel URL; seed data updated
+
+### DONE (2026-11-08)
+- Vercel deploy fix: pinned engines.node to 22.x — Vercel now builds with Node 26, where better-sqlite3 12.4.1 has no prebuilt binary and its native build fails to compile (SQLITE_VALUE_TO_JS / node-gyp error), breaking `npm install`. Node 22 has prebuilds for 12.4.1.

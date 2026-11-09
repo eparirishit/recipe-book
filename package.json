@@ -6,7 +6,7 @@
   },
   "description": "Personal recipe collection web app \u2014 recipes, cooking mode, grocery list",
   "engines": {
-    "node": ">=18"
+    "node": "22.x"
   },
   "license": "UNLICENSED",
   "name": "recipe-book-app",
