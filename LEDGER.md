@@ -83,3 +83,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 
 ### DONE (2026-10-19)
 - Recipe 19: Garlic Coriander Soup (@ral.livezy, recipe by @theexcitedcookandtraveller) added via API with reel URL; seed data updated
+
+### DONE (2026-11-08)
+- Recipe 20: Chicken Rasam (@asmazingtales_) added via API with reel URL; seed data updated
