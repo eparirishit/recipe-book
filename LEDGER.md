@@ -92,3 +92,6 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`. Scope is optional.
 
 ### DONE (2026-11-08)
 - Vercel deploy fix: pinned engines.node to 22.x — Vercel now builds with Node 26, where better-sqlite3 12.4.1 has no prebuilt binary and its native build fails to compile (SQLITE_VALUE_TO_JS / node-gyp error), breaking `npm install`. Node 22 has prebuilds for 12.4.1.
+
+### DONE (2026-11-10)
+- Recipe 22: Special Sweet Corn Chicken Soup (@ral.livezy, recipe by @gskcooks2k23) added via API with reel URL; seed data updated
